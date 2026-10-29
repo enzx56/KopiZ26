@@ -31,20 +31,11 @@ putenv('VIEW_COMPILED_PATH=/tmp/views');
 // Autoload composer
 require __DIR__ . '/../vendor/autoload.php';
 
-try {
-    /** @var Application $app */
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
+// Bootstrap Laravel and handle the request
+/** @var Application $app */
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
-    // Set writable paths
-    $app->useStoragePath('/tmp/storage');
+// Set writable storage path
+$app->useStoragePath('/tmp/storage');
 
-    $request = Request::capture();
-    $response = $app->handleRequest($request);
-    $response->send();
-} catch (\Throwable $e) {
-    http_response_code(500);
-    echo "<h1>Laravel Serverless Error</h1>";
-    echo "<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
-    echo "<p><strong>File:</strong> " . htmlspecialchars($e->getFile()) . " on line " . $e->getLine() . "</p>";
-    echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
-}
+$app->handleRequest(Request::capture());
