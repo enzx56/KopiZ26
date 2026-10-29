@@ -21,6 +21,10 @@ foreach ($tmpDirs as $dir) {
     }
 }
 
+// Ensure write permissions
+@chmod('/tmp/views', 0777);
+@chmod('/tmp/storage', 0777);
+
 putenv('APP_CONFIG_CACHE=/tmp/bootstrap/cache/config.php');
 putenv('APP_EVENTS_CACHE=/tmp/bootstrap/cache/events.php');
 putenv('APP_PACKAGES_CACHE=/tmp/bootstrap/cache/packages.php');
@@ -42,10 +46,13 @@ $app->useStoragePath('/tmp/storage');
 $request = Request::capture();
 
 // Fix request URI for Vercel internal rewrite: if path is /api/index.php, recover original path
-if (str_starts_with($request->server->get('REQUEST_URI', ''), '/api/index.php')) {
+$requestUri = $request->server->get('REQUEST_URI', '/');
+if (str_starts_with($requestUri, '/api/index.php') || $requestUri === '/api' || $requestUri === '/api/') {
     $origUri = $request->server->get('HTTP_X_NOW_ROUTE', $request->server->get('HTTP_X_VERCEL_FORWARDED_PATH', '/'));
     if ($origUri) {
         $request->server->set('REQUEST_URI', $origUri);
+    } else {
+        $request->server->set('REQUEST_URI', '/');
     }
 }
 
