@@ -11,7 +11,9 @@ use App\Models\PreOrder;
 use App\Models\Product;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class PublicController extends Controller
@@ -169,15 +171,34 @@ class PublicController extends Controller
                 $normalizedPhone = '62' . substr($normalizedPhone, 1);
             }
 
-            // Deduplikasi Customer
-            $customer = Customer::firstOrCreate(
-                ['normalized_phone' => $normalizedPhone],
-                [
+            // Deduplikasi Customer atau Sinkronisasi Akun
+            if (Auth::guard('customer')->check()) {
+                $customer = Auth::guard('customer')->user();
+                $customer->update([
                     'name' => trim($request->customer_name),
                     'phone' => $rawPhone,
-                    'instagram_handle' => $request->instagram_handle,
-                ]
-            );
+                    'normalized_phone' => $normalizedPhone,
+                    'instagram_handle' => $request->instagram_handle ?: $customer->instagram_handle,
+                ]);
+            } else {
+                $customer = Customer::firstOrCreate(
+                    ['normalized_phone' => $normalizedPhone],
+                    [
+                        'name' => trim($request->customer_name),
+                        'phone' => $rawPhone,
+                        'instagram_handle' => $request->instagram_handle,
+                    ]
+                );
+
+                if ($request->filled('password') && strlen($request->password) >= 6) {
+                    $customer->password = Hash::make($request->password);
+                    $customer->name = trim($request->customer_name);
+                    $customer->phone = $rawPhone;
+                    $customer->instagram_handle = $request->instagram_handle ?: $customer->instagram_handle;
+                    $customer->save();
+                    Auth::guard('customer')->login($customer, true);
+                }
+            }
 
             // Validasi Pre-Order jika pesanan jenis PO
             $preOrder = null;

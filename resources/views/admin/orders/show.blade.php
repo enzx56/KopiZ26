@@ -5,29 +5,66 @@
 
 @section('content')
 <div class="space-y-6 max-w-5xl mx-auto">
-    <div class="flex items-center justify-between">
+    <!-- Top Action Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <a href="{{ route('admin.orders.index') }}" class="text-xs font-bold text-[#6F4E37] hover:text-[#3A2418] flex items-center gap-1.5">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             <span>Kembali ke Daftar Pesanan</span>
         </a>
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.orders.print', $order->id) }}" target="_blank" class="px-4 py-2 rounded-xl bg-[#F3E5D0] hover:bg-[#D8B894] text-[#3A2418] text-xs font-bold flex items-center gap-1.5">
+            <a href="{{ route('admin.orders.print', $order->id) }}" target="_blank" class="px-4 py-2 rounded-xl bg-[#F3E5D0] hover:bg-[#D8B894] text-[#3A2418] text-xs font-bold flex items-center gap-1.5 transition-all">
                 <i data-lucide="printer" class="w-4 h-4"></i>
                 <span>Cetak Struk / Ringkasan</span>
             </a>
-            <a href="{{ route('order.track', $order->order_code) }}" target="_blank" class="px-4 py-2 rounded-xl bg-[#3A2418] text-white text-xs font-bold flex items-center gap-1.5">
+            <a href="{{ route('order.track', $order->order_code) }}" target="_blank" class="px-4 py-2 rounded-xl bg-[#3A2418] hover:bg-[#6F4E37] text-white text-xs font-bold flex items-center gap-1.5 transition-all">
                 <i data-lucide="external-link" class="w-4 h-4"></i>
                 <span>Lihat Status Publik</span>
             </a>
         </div>
     </div>
 
+    <!-- Alert Notifikasi WhatsApp Setelah Update Status -->
+    @if(session('just_updated_status') && isset($waTemplates[session('just_updated_status')]))
+        <div class="p-4 rounded-2xl bg-[#E8F5E9] border border-[#2E7D5B]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#2E7D5B] text-white flex items-center justify-center shrink-0">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black text-[#2E7D5B]">Kirim Notifikasi Status ke WhatsApp Pelanggan?</h4>
+                    <p class="text-[11px] text-[#2E7D5B]/80">Status baru: <strong>{{ session('just_updated_status') }}</strong>. Beritahu pelanggan dalam 1 klik via WhatsApp.</p>
+                </div>
+            </div>
+            <a href="https://wa.me/{{ $customerPhone }}?text={{ urlencode($waTemplates[session('just_updated_status')]) }}" target="_blank" class="px-4 py-2 rounded-xl bg-[#2E7D5B] hover:bg-[#256349] text-white text-xs font-bold flex items-center gap-2 shrink-0 shadow-sm transition-all">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                <span>Kirim WhatsApp Sekarang</span>
+            </a>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Kolom Kiri: Rincian Order Items & Data Pelanggan (2 Cols) -->
         <div class="lg:col-span-2 space-y-6">
             <!-- Data Pelanggan & Info Transaksi -->
             <div class="bg-white p-6 rounded-3xl border border-[#D8B894]/60 shadow-sm space-y-4">
-                <h3 class="text-base font-black text-[#3A2418]">Informasi Pelanggan & Jadwal</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-base font-black text-[#3A2418]">Informasi Pelanggan & Jadwal</h3>
+                    @php
+                        $badgeClasses = match($order->status) {
+                            'PENDING' => 'bg-[#B7791F]/15 text-[#B7791F] border-[#B7791F]/30',
+                            'CONFIRMED' => 'bg-[#2E7D5B]/15 text-[#2E7D5B] border-[#2E7D5B]/30',
+                            'PREPARING' => 'bg-[#B9824A]/15 text-[#B9824A] border-[#B9824A]/30',
+                            'READY_FOR_PICKUP' => 'bg-[#2E7D5B]/20 text-[#2E7D5B] border-[#2E7D5B]/40',
+                            'COMPLETED' => 'bg-[#3A2418] text-white border-[#3A2418]',
+                            'CANCELLED' => 'bg-[#B93838]/15 text-[#B93838] border-[#B93838]/30',
+                            default => 'bg-gray-100 text-gray-700 border-gray-300'
+                        };
+                    @endphp
+                    <span class="px-3 py-1 rounded-full text-xs font-black border {{ $badgeClasses }}">
+                        {{ $order->status }}
+                    </span>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
                         <span class="text-[#6F4E37] block">Nama Pelanggan:</span>
@@ -35,7 +72,7 @@
                     </div>
                     <div>
                         <span class="text-[#6F4E37] block">Nomor WhatsApp:</span>
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $order->customer->phone) }}" target="_blank" class="font-bold text-sm text-[#2E7D5B] hover:underline flex items-center gap-1">
+                        <a href="https://wa.me/{{ $customerPhone }}" target="_blank" class="font-bold text-sm text-[#2E7D5B] hover:underline flex items-center gap-1">
                             <i data-lucide="phone" class="w-3.5 h-3.5"></i>
                             <span>{{ $order->customer->phone }}</span>
                         </a>
@@ -109,7 +146,7 @@
                 </div>
             </div>
 
-            <!-- Riwayat Perubahan Status (PRD Section 12) -->
+            <!-- Riwayat Perubahan Status (Audit Trail) -->
             <div class="bg-white p-6 rounded-3xl border border-[#D8B894]/60 shadow-sm space-y-4">
                 <h3 class="text-base font-black text-[#3A2418]">Riwayat Status Pesanan (Audit Trail)</h3>
                 <div class="space-y-3">
@@ -133,24 +170,96 @@
             </div>
         </div>
 
-        <!-- Kolom Kanan: Pengubah Alur Status (1 Col) -->
+        <!-- Kolom Kanan: Verifikasi & Aksi WhatsApp (1 Col) -->
         <div class="space-y-6">
-            <div class="bg-white p-6 rounded-3xl border border-[#D8B894]/60 shadow-sm space-y-5">
+            <!-- Kartu Aksi Cepat Verifikasi Status -->
+            <div class="bg-white p-6 rounded-3xl border border-[#D8B894]/60 shadow-sm space-y-4">
                 <div>
-                    <h3 class="text-base font-black text-[#3A2418]">Ubah Status Pesanan</h3>
-                    <p class="text-xs text-[#6F4E37]">Perbarui alur tahapan persiapan pesanan pelanggan</p>
+                    <h3 class="text-base font-black text-[#3A2418]">Verifikasi & Alur Cepat</h3>
+                    <p class="text-xs text-[#6F4E37]">1-Klik untuk memajukan tahapan pesanan</p>
                 </div>
 
-                <div class="p-3 rounded-xl bg-[#FFF8EF] border border-[#D8B894]/40 text-xs text-[#3A2418] flex items-center justify-between">
-                    <span>Status Saat Ini:</span>
-                    <span class="font-black px-2.5 py-1 rounded-full bg-[#3A2418] text-white">{{ $order->status }}</span>
+                <div class="space-y-2">
+                    @if($order->status === 'PENDING')
+                        <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="status" value="CONFIRMED">
+                            <input type="hidden" name="note" value="Pesanan dikonfirmasi oleh Admin/Kasir setelah pembayaran/verifikasi WA valid.">
+                            <button type="submit" class="w-full py-3 rounded-2xl bg-[#2E7D5B] hover:bg-[#256349] text-white text-xs font-black shadow-md flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                <span>Verifikasi & Konfirmasi Pesanan</span>
+                            </button>
+                        </form>
+                    @elseif($order->status === 'CONFIRMED')
+                        <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="status" value="PREPARING">
+                            <input type="hidden" name="note" value="Pesanan mulai diracik oleh Barista di bar kopi.">
+                            <button type="submit" class="w-full py-3 rounded-2xl bg-[#B9824A] hover:bg-[#976834] text-white text-xs font-black shadow-md flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="coffee" class="w-4 h-4"></i>
+                                <span>Mulai Diracik Barista</span>
+                            </button>
+                        </form>
+                    @elseif($order->status === 'PREPARING')
+                        <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="status" value="READY_FOR_PICKUP">
+                            <input type="hidden" name="note" value="Pesanan sudah selesai diracik dan siap diambil di counter kasir.">
+                            <button type="submit" class="w-full py-3 rounded-2xl bg-[#2E7D5B] hover:bg-[#256349] text-white text-xs font-black shadow-md flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="bell" class="w-4 h-4"></i>
+                                <span>Pesanan Siap Diambil</span>
+                            </button>
+                        </form>
+                    @elseif($order->status === 'READY_FOR_PICKUP')
+                        <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="status" value="COMPLETED">
+                            <input type="hidden" name="note" value="Pesanan telah diserahkan kepada pelanggan. Transaksi selesai.">
+                            <button type="submit" class="w-full py-3 rounded-2xl bg-[#3A2418] hover:bg-[#6F4E37] text-white text-xs font-black shadow-md flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                                <span>Selesaikan Pesanan (Sudah Diambil)</span>
+                            </button>
+                        </form>
+                    @elseif($order->status === 'COMPLETED')
+                        <div class="p-3 rounded-2xl bg-[#2E7D5B]/10 border border-[#2E7D5B]/30 text-center">
+                            <span class="text-xs font-black text-[#2E7D5B] block">Pesanan Telah Selesai ✓</span>
+                            <span class="text-[11px] text-[#6F4E37]">Transaksi selesai dan kopi telah dinikmati pelanggan.</span>
+                        </div>
+                    @endif
                 </div>
+
+                <hr class="border-[#D8B894]/40 my-3">
+
+                <!-- Hubungi WhatsApp Pelanggan -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-black text-[#3A2418] flex items-center gap-1.5">
+                        <i data-lucide="message-square" class="w-4 h-4 text-[#2E7D5B]"></i>
+                        <span>Kirim Notifikasi WhatsApp</span>
+                    </h4>
+
+                    @if(isset($waTemplates[$order->status]))
+                        <a href="https://wa.me/{{ $customerPhone }}?text={{ urlencode($waTemplates[$order->status]) }}" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-[#2E7D5B]/15 hover:bg-[#2E7D5B]/25 text-[#2E7D5B] text-xs font-bold flex items-center justify-between transition-all">
+                            <span class="truncate">Kirim Notif Status ({{ $order->status }})</span>
+                            <i data-lucide="send" class="w-3.5 h-3.5 shrink-0"></i>
+                        </a>
+                    @endif
+
+                    <a href="https://wa.me/{{ $customerPhone }}?text={{ urlencode($waTemplates['GENERAL']) }}" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-[#F3E5D0] hover:bg-[#D8B894] text-[#3A2418] text-xs font-bold flex items-center justify-between transition-all">
+                        <span>Chat Langsung di WhatsApp</span>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form Manual Pengubah Alur Status & Pembatalan -->
+            <div class="bg-white p-6 rounded-3xl border border-[#D8B894]/60 shadow-sm space-y-4">
+                <h3 class="text-sm font-black text-[#3A2418]">Ubah Status Manual</h3>
 
                 <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="space-y-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-bold text-[#3A2418] mb-1">Pilih Status Baru *</label>
-                        <select name="status" class="w-full px-3 py-2.5 rounded-xl border border-[#D8B894] text-xs font-bold text-[#3A2418] focus:outline-none focus:border-[#B9824A]">
+                        <select name="status" class="w-full px-3 py-2 rounded-xl border border-[#D8B894] text-xs font-bold text-[#3A2418] focus:outline-none focus:border-[#B9824A]">
                             <option value="PENDING" {{ $order->status == 'PENDING' ? 'selected' : '' }}>PENDING (Menunggu Konfirmasi)</option>
                             <option value="CONFIRMED" {{ $order->status == 'CONFIRMED' ? 'selected' : '' }}>CONFIRMED (Dikonfirmasi)</option>
                             <option value="PREPARING" {{ $order->status == 'PREPARING' ? 'selected' : '' }}>PREPARING (Sedang Diracik)</option>
@@ -162,11 +271,11 @@
 
                     <div>
                         <label class="block text-xs font-bold text-[#3A2418] mb-1">Catatan Internal Perubahan</label>
-                        <textarea name="note" rows="3" placeholder="Contoh: Pembayaran telah diterima via QRIS kasir, pesanan diserahkan..." class="w-full px-3 py-2 rounded-xl border border-[#D8B894] text-xs focus:outline-none focus:border-[#B9824A]"></textarea>
+                        <textarea name="note" rows="2" placeholder="Catatan internal perubahan status..." class="w-full px-3 py-2 rounded-xl border border-[#D8B894] text-xs focus:outline-none focus:border-[#B9824A]"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full py-3 rounded-xl bg-[#3A2418] hover:bg-[#6F4E37] text-white text-xs font-bold shadow-md transition-all">
-                        Perbarui Status
+                    <button type="submit" class="w-full py-2.5 rounded-xl bg-[#3A2418] hover:bg-[#6F4E37] text-white text-xs font-bold shadow-sm transition-all">
+                        Simpan Perubahan
                     </button>
                 </form>
             </div>

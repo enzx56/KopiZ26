@@ -49,7 +49,26 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load(['customer', 'items.product', 'preOrder', 'statusHistories.user']);
-        return view('admin.orders.show', compact('order'));
+
+        // Persiapan nomor WhatsApp yang dinormalisasi
+        $customerPhone = preg_replace('/[^0-9]/', '', $order->customer->phone ?? '');
+        if (str_starts_with($customerPhone, '0')) {
+            $customerPhone = '62' . substr($customerPhone, 1);
+        }
+
+        $trackUrl = route('order.track', $order->order_code);
+        $totalFormatted = 'Rp' . number_format($order->total_amount, 0, ',', '.');
+
+        // Template Notifikasi WhatsApp berdasarkan status
+        $waTemplates = [
+            'CONFIRMED' => "Halo Kak *{$order->customer->name}*! Pesanan Anda di *KopiZ* (*#{$order->order_code}*) senilai *{$totalFormatted}* telah *DIKONFIRMASI* oleh kasir dan masuk antrean racik barista kami. ☕\n\nPantau status pesanan: {$trackUrl}\n\nTerima kasih telah memesan di KopiZ!",
+            'PREPARING' => "Halo Kak *{$order->customer->name}*! Barista kami sedang *MERACIK* pesanan KopiZ Anda (*#{$order->order_code}*). ☕✨\n\nPantau status: {$trackUrl}",
+            'READY_FOR_PICKUP' => "Halo Kak *{$order->customer->name}*! Kopi pesanan Anda (*#{$order->order_code}*) sudah *SIAP DIAMBIL* di kedai KopiZ! ☕🎉\n\nSilakan tunjukkan kode pesanan ke kasir kami. Ditunggu kedatangannya!",
+            'COMPLETED' => "Halo Kak *{$order->customer->name}*! Pesanan *#{$order->order_code}* telah *SELESAI*. Terima kasih banyak! Selamat menikmati kopi racikan KopiZ ☕✨",
+            'GENERAL' => "Halo Kak *{$order->customer->name}*, kami dari *KopiZ* ingin menginfokan terkait pesanan Anda (*#{$order->order_code}*)...",
+        ];
+
+        return view('admin.orders.show', compact('order', 'customerPhone', 'waTemplates'));
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -91,16 +110,27 @@ class OrderController extends Controller
 
         $order->save();
 
+        $defaultNote = match($toStatus) {
+            'CONFIRMED' => 'Pesanan diverifikasi & dikonfirmasi oleh Admin/Kasir.',
+            'PREPARING' => 'Pesanan sedang diproses dan diracik oleh Barista.',
+            'READY_FOR_PICKUP' => 'Pesanan telah selesai dibuat dan siap diambil oleh pelanggan di kedai.',
+            'COMPLETED' => 'Pesanan telah diserahkan dan transaksi selesai.',
+            'CANCELLED' => 'Pesanan dibatalkan oleh Admin/Kasir.',
+            default => "Status diubah dari {$fromStatus} ke {$toStatus}",
+        };
+
         OrderStatusHistory::create([
             'order_id' => $order->id,
             'from_status' => $fromStatus,
             'to_status' => $toStatus,
             'changed_by' => Auth::id(),
-            'note' => $request->note ?: "Status diubah dari {$fromStatus} ke {$toStatus}",
+            'note' => $request->note ?: $defaultNote,
             'created_at' => now(),
         ]);
 
-        return back()->with('success', "Status pesanan {$order->order_code} berhasil diperbarui menjadi {$toStatus}.");
+        return back()
+            ->with('success', "Status pesanan {$order->order_code} berhasil diperbarui menjadi {$toStatus}.")
+            ->with('just_updated_status', $toStatus);
     }
 
     public function printReceipt(Order $order)

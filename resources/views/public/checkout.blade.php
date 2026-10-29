@@ -20,6 +20,26 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Left: Form Pemesan -->
             <div class="md:col-span-2 space-y-6">
+                @if(Auth::guard('customer')->check())
+                    <div class="p-4 rounded-2xl bg-[#2E7D5B]/15 border border-[#2E7D5B]/30 flex items-center justify-between text-xs text-[#2E7D5B]">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i>
+                            <span>Masuk sebagai <strong>{{ Auth::guard('customer')->user()->name }}</strong>. Pesanan otomatis tersimpan di akun Anda.</span>
+                        </div>
+                        <a href="{{ route('customer.orders') }}" class="font-bold underline hover:text-[#256349] shrink-0">Pesanan Saya</a>
+                    </div>
+                @else
+                    <div class="p-4 rounded-2xl bg-[#FFF8EF] border border-[#D8B894] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                        <div class="flex items-center gap-2 text-[#6F4E37]">
+                            <i data-lucide="user-plus" class="w-4 h-4 text-[#B9824A] shrink-0"></i>
+                            <span>Sudah punya akun KopiZ? Masuk untuk isi data otomatis & kumpulkan riwayat pesanan.</span>
+                        </div>
+                        <a href="{{ route('customer.login') }}" class="px-4 py-1.5 rounded-xl bg-[#3A2418] text-white font-bold shrink-0 hover:bg-[#6F4E37] transition-all">
+                            Masuk Akun
+                        </a>
+                    </div>
+                @endif
+
                 <div class="bg-white p-6 sm:p-8 rounded-3xl border border-[#D8B894]/60 shadow-sm space-y-5">
                     <h3 class="text-lg font-black text-[#3A2418] flex items-center gap-2">
                         <i data-lucide="user" class="w-5 h-5 text-[#B9824A]"></i>
@@ -28,19 +48,33 @@
 
                     <div>
                         <label class="block text-xs font-bold text-[#3A2418] mb-1">Nama Lengkap *</label>
-                        <input type="text" name="customer_name" required placeholder="Contoh: Rian Pratama" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
+                        <input type="text" name="customer_name" value="{{ old('customer_name', Auth::guard('customer')->user()?->name) }}" required placeholder="Contoh: Rian Pratama" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-[#3A2418] mb-1">Nomor WhatsApp Aktif *</label>
-                        <input type="text" name="customer_phone" required placeholder="Contoh: 081234567890" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
+                        <input type="text" name="customer_phone" value="{{ old('customer_phone', Auth::guard('customer')->user()?->phone) }}" required placeholder="Contoh: 081234567890" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
                         <span class="text-[11px] text-[#6F4E37] mt-1 block">Nomor ini akan digunakan untuk mengirimkan rincian pesanan dan konfirmasi.</span>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-[#3A2418] mb-1">Username Instagram (Opsional)</label>
-                        <input type="text" name="instagram_handle" placeholder="Contoh: @rianpratama" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
+                        <input type="text" name="instagram_handle" value="{{ old('instagram_handle', Auth::guard('customer')->user()?->instagram_handle) }}" placeholder="Contoh: @rianpratama" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
                     </div>
+
+                    @if(!Auth::guard('customer')->check())
+                        <div class="p-4 rounded-2xl bg-[#FFF8EF] border border-[#D8B894]/60 space-y-3">
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="checkbox" id="register-toggle" onchange="document.getElementById('password-box').classList.toggle('hidden', !this.checked)" class="rounded text-[#3A2418] focus:ring-[#B9824A]">
+                                <span class="text-xs font-bold text-[#3A2418]">Buat akun KopiZ sekalian (simpan riwayat pesanan)</span>
+                            </label>
+                            <div id="password-box" class="hidden pt-1">
+                                <label class="block text-xs font-bold text-[#3A2418] mb-1">Buat Password Akun (Min. 6 Karakter)</label>
+                                <input type="password" name="password" minlength="6" placeholder="Masukkan password untuk login nanti..." class="w-full px-4 py-2.5 rounded-xl border border-[#D8B894] text-xs text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-white">
+                                <span class="text-[10px] text-[#6F4E37] mt-1 block">Anda bisa login kapan saja menggunakan No. WhatsApp ini & password yang Anda buat.</span>
+                            </div>
+                        </div>
+                    @endif
 
                     <div>
                         <label class="block text-xs font-bold text-[#3A2418] mb-1">Rencana Waktu Pengambilan *</label>

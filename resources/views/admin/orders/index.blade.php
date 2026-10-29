@@ -109,11 +109,20 @@
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    @php
+                                        $cPhone = preg_replace('/[^0-9]/', '', $order->customer->phone ?? '');
+                                        if (str_starts_with($cPhone, '0')) {
+                                            $cPhone = '62' . substr($cPhone, 1);
+                                        }
+                                    @endphp
+                                    <a href="https://wa.me/{{ $cPhone }}?text={{ urlencode('Halo Kak ' . $order->customer->name . ', kami dari KopiZ mengenai pesanan #' . $order->order_code . '...') }}" target="_blank" class="p-1.5 rounded-lg bg-[#2E7D5B]/15 text-[#2E7D5B] hover:bg-[#2E7D5B]/25 transition-all" title="Chat WhatsApp Pelanggan">
+                                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                                    </a>
                                     <a href="{{ route('order.track', $order->order_code) }}" target="_blank" class="p-1.5 rounded-lg bg-[#F3E5D0] text-[#3A2418] hover:bg-[#D8B894]" title="Buka Halaman Publik Pelanggan">
                                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                                     </a>
-                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="px-3 py-1.5 rounded-xl bg-[#3A2418] text-white font-bold text-xs hover:bg-[#6F4E37]">
+                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="px-3 py-1.5 rounded-xl bg-[#3A2418] text-white font-bold text-xs hover:bg-[#6F4E37] transition-all">
                                         Kelola
                                     </a>
                                 </div>

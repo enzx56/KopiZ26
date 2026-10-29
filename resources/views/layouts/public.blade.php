@@ -70,28 +70,37 @@
             </a>
 
             <!-- Desktop Nav Links -->
-            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-[#3A2418]">
+            <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-[#3A2418]">
                 <a href="{{ route('home') }}" class="hover:text-[#B9824A] transition-colors {{ request()->routeIs('home') ? 'text-[#B9824A]' : '' }}">Beranda</a>
                 <a href="{{ route('menu') }}" class="hover:text-[#B9824A] transition-colors {{ request()->routeIs('menu*') ? 'text-[#B9824A]' : '' }}">Menu Kopi</a>
                 <a href="{{ route('po') }}" class="hover:text-[#B9824A] transition-colors {{ request()->routeIs('po*') ? 'text-[#B9824A]' : '' }}">Pre-Order (PO)</a>
+                <a href="{{ route('order.lookup') }}" class="hover:text-[#B9824A] transition-colors {{ request()->routeIs('order.lookup') ? 'text-[#B9824A]' : '' }}">Lacak Pesanan</a>
                 <a href="{{ route('how-to-order') }}" class="hover:text-[#B9824A] transition-colors {{ request()->routeIs('how-to-order') ? 'text-[#B9824A]' : '' }}">Cara Pesan</a>
                 <a href="{{ route('about') }}" class="hover:text-[#B9824A] transition-colors {{ request()->routeIs('about') ? 'text-[#B9824A]' : '' }}">Tentang</a>
                 <a href="{{ route('contact') }}" class="hover:text-[#B9824A] transition-colors {{ request()->routeIs('contact') ? 'text-[#B9824A]' : '' }}">Kontak</a>
             </nav>
 
-            <!-- Actions (Cart & WA) -->
-            <div class="flex items-center gap-3">
-                <a href="{{ route('cart') }}" class="relative inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#F3E5D0] hover:bg-[#D8B894]/70 text-[#3A2418] text-sm font-bold transition-all shadow-sm">
+            <!-- Actions (Cart & Customer Auth) -->
+            <div class="flex items-center gap-2.5">
+                <a href="{{ route('cart') }}" class="relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#F3E5D0] hover:bg-[#D8B894]/70 text-[#3A2418] text-xs sm:text-sm font-bold transition-all shadow-sm">
                     <i data-lucide="shopping-bag" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Keranjang</span>
                     <span id="cart-count" class="badge-cart w-5 h-5 rounded-full bg-[#3A2418] text-white text-xs font-bold">0</span>
                 </a>
 
-                <a href="{{ $settings['instagram_url'] ?? 'https://instagram.com/kopiz.id' }}" target="_blank" rel="noopener" class="w-10 h-10 rounded-full bg-[#F3E5D0] hover:bg-[#D8B894]/70 text-[#3A2418] flex items-center justify-center transition-all" title="Instagram KopiZ">
-                    <i data-lucide="instagram" class="w-4 h-4"></i>
-                </a>
+                @if(Auth::guard('customer')->check())
+                    <a href="{{ route('customer.orders') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#3A2418] hover:bg-[#6F4E37] text-white text-xs font-bold shadow-sm transition-all" title="Akun Pelanggan KopiZ">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span class="max-w-[100px] truncate">{{ Str::limit(Auth::guard('customer')->user()->name, 12) }}</span>
+                    </a>
+                @else
+                    <a href="{{ route('customer.login') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#3A2418] hover:bg-[#6F4E37] text-white text-xs font-bold shadow-sm transition-all">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                        <span>Masuk</span>
+                    </a>
+                @endif
 
-                <a href="{{ route('admin.login') }}" class="text-xs font-semibold text-[#6F4E37] hover:text-[#3A2418] px-2 py-1 rounded transition-colors hidden lg:inline-block" title="Login Admin KopiZ">
+                <a href="{{ route('admin.login') }}" class="text-xs font-semibold text-[#6F4E37] hover:text-[#3A2418] px-2 py-1 rounded transition-colors hidden xl:inline-block" title="Login Admin KopiZ">
                     Admin
                 </a>
             </div>
