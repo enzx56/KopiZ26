@@ -41,6 +41,7 @@
     "APP_NAME": "KopiZ",
     "APP_ENV": "production",
     "APP_KEY": "base64:yfYSh6/VQyuwk/CA1KGdo4oeQVG3oZBZgXXLmGrkwZA=",
+    "APP_DEBUG": "true",
     "DB_CONNECTION": "pgsql",
     "DATABASE_URL": "postgresql://postgres.zvvacylkdrlebsomarsw:mlr3HSGpgu50wkDQ@aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require",
     "DB_HOST": "aws-0-us-east-1.pooler.supabase.com",
