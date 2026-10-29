@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    --color-coffee-primary: #3A2418;
+    --color-coffee-secondary: #6F4E37;
+    --color-coffee-accent: #B9824A;
+    --color-coffee-bg: #FFF8EF;
+    --color-coffee-surface: #F3E5D0;
+    --color-coffee-border: #D8B894;
+    --color-coffee-text: #2B1B14;
+    --color-coffee-success: #2E7D5B;
+    --color-coffee-warning: #B7791F;
+    --color-coffee-error: #B93838;
+}
+
+:root {
+    --primary: #3A2418;
+    --secondary: #6F4E37;
+    --accent: #B9824A;
+    --bg-cream: #FFF8EF;
+    --surface-cream: #F3E5D0;
+    --border-beige: #D8B894;
+    --text-espresso: #2B1B14;
+}
+
+body {
+    background-color: var(--bg-cream);
+    color: var(--text-espresso);
+    font-family: var(--font-sans);
+}
