@@ -38,4 +38,23 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 // Set writable storage path
 $app->useStoragePath('/tmp/storage');
 
-$app->handleRequest(Request::capture());
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+$response = $kernel->handle(
+    $request = Request::capture()
+);
+
+if (request()->has('debug_error') && $response->getStatusCode() === 500) {
+    // Force log dump
+    $logFile = '/tmp/storage/logs/laravel.log';
+    if (file_exists($logFile)) {
+        header('Content-Type: text/plain');
+        echo "=== LARAVEL LOG DUMP ===\n";
+        echo file_get_contents($logFile);
+        exit;
+    }
+}
+
+$response->send();
+
+$kernel->terminate($request, $response);
