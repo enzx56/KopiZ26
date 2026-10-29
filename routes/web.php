@@ -38,7 +38,22 @@ Route::get('/debug-view', function () {
     }
 });
 
-Route::get('/', [PublicController::class, 'home'])->name('home');
+Route::get('/', function () {
+    try {
+        $settings = \App\Models\Setting::pluck('value', 'key')->all();
+        $featuredProducts = \App\Models\Product::active()->take(6)->get();
+        $activePreOrders = \App\Models\PreOrder::take(2)->get();
+        return view('public.home', compact('settings', 'featuredProducts', 'activePreOrders'));
+    } catch (\Throwable $e) {
+        return response(
+            "<h1>KopiZ Debug</h1>" .
+            "<p><strong>Error:</strong> " . htmlspecialchars($e->getMessage()) . "</p>" .
+            "<p><strong>Location:</strong> " . htmlspecialchars($e->getFile()) . ":" . $e->getLine() . "</p>" .
+            "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>",
+            200
+        );
+    }
+})->name('home');
 Route::get('/menu', [PublicController::class, 'menu'])->name('menu');
 Route::get('/menu/{slug}', [PublicController::class, 'menuDetail'])->name('menu.detail');
 Route::get('/po', [PublicController::class, 'preOrders'])->name('po');
