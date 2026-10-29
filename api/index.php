@@ -38,4 +38,15 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 // Set writable storage path
 $app->useStoragePath('/tmp/storage');
 
-$app->handleRequest(Request::capture());
+// Capture incoming serverless request
+$request = Request::capture();
+
+// Fix request URI for Vercel internal rewrite: if path is /api/index.php, recover original path
+if (str_starts_with($request->server->get('REQUEST_URI', ''), '/api/index.php')) {
+    $origUri = $request->server->get('HTTP_X_NOW_ROUTE', $request->server->get('HTTP_X_VERCEL_FORWARDED_PATH', '/'));
+    if ($origUri) {
+        $request->server->set('REQUEST_URI', $origUri);
+    }
+}
+
+$app->handleRequest($request);
