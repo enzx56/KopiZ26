@@ -59,13 +59,12 @@ class OrderController extends Controller
         $trackUrl = route('order.track', $order->order_code);
         $totalFormatted = 'Rp' . number_format($order->total_amount, 0, ',', '.');
 
-        // Template Notifikasi WhatsApp berdasarkan status
+        // Template Notifikasi WhatsApp berdasarkan status murni via WA
         $waTemplates = [
-            'CONFIRMED' => "Halo Kak *{$order->customer->name}*! Pesanan Anda di *KopiZ* (*#{$order->order_code}*) senilai *{$totalFormatted}* telah *DIKONFIRMASI* oleh kasir dan masuk antrean racik barista kami. ☕\n\nPantau status pesanan: {$trackUrl}\n\nTerima kasih telah memesan di KopiZ!",
-            'PREPARING' => "Halo Kak *{$order->customer->name}*! Barista kami sedang *MERACIK* pesanan KopiZ Anda (*#{$order->order_code}*). ☕✨\n\nPantau status: {$trackUrl}",
-            'READY_FOR_PICKUP' => "Halo Kak *{$order->customer->name}*! Kopi pesanan Anda (*#{$order->order_code}*) sudah *SIAP DIAMBIL* di kedai KopiZ! ☕🎉\n\nSilakan tunjukkan kode pesanan ke kasir kami. Ditunggu kedatangannya!",
-            'COMPLETED' => "Halo Kak *{$order->customer->name}*! Pesanan *#{$order->order_code}* telah *SELESAI*. Terima kasih banyak! Selamat menikmati kopi racikan KopiZ ☕✨",
-            'GENERAL' => "Halo Kak *{$order->customer->name}*, kami dari *KopiZ* ingin menginfokan terkait pesanan Anda (*#{$order->order_code}*)...",
+            'CONFIRMED' => "Halo Kak *{$order->customer->name}*! Pesanan Anda di *KopiZ* (*#{$order->order_code}*) senilai *{$totalFormatted}* telah *DIKONFIRMASI*. Pesanan sedang kami siapkan! ☕\n\nPantau status pesanan: {$trackUrl}\n\nTerima kasih!",
+            'PREPARING' => "Halo Kak *{$order->customer->name}*! Pesanan KopiZ Anda (*#{$order->order_code}*) sedang *DIRACIK* oleh barista. ☕✨",
+            'COMPLETED' => "Halo Kak *{$order->customer->name}*! Pesanan KopiZ Anda (*#{$order->order_code}*) telah *SELESAI*. Selamat menikmati kopi kami! ☕✨",
+            'GENERAL' => "Halo Kak *{$order->customer->name}*, kami dari *KopiZ* terkait pesanan Anda (*#{$order->order_code}*)...",
         ];
 
         return view('admin.orders.show', compact('order', 'customerPhone', 'waTemplates'));
@@ -73,8 +72,9 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
+        // Status alur pesanan yang disederhanakan tanpa pickup
         $request->validate([
-            'status' => 'required|in:PENDING,CONFIRMED,PREPARING,READY_FOR_PICKUP,COMPLETED,CANCELLED',
+            'status' => 'required|in:PENDING,CONFIRMED,PREPARING,COMPLETED,CANCELLED',
             'note' => 'nullable|string|max:500',
         ]);
 
@@ -85,9 +85,8 @@ class OrderController extends Controller
             return back()->with('info', 'Status tidak berubah.');
         }
 
-        // Validasi transisi status (PRD Section 12)
         if ($fromStatus === 'COMPLETED' && $toStatus !== 'COMPLETED') {
-            return back()->withErrors(['msg' => 'Pesanan yang telah COMPLETED tidak dapat diubah statusnya kembali tanpa verifikasi khusus.']);
+            return back()->withErrors(['msg' => 'Pesanan yang telah COMPLETED tidak dapat diubah statusnya kembali.']);
         }
 
         $order->status = $toStatus;
@@ -98,7 +97,6 @@ class OrderController extends Controller
             $order->completed_at = now();
         } elseif ($toStatus === 'CANCELLED' && !$order->cancelled_at) {
             $order->cancelled_at = now();
-            // Kembalikan kuota PO jika pesanan dibatalkan
             if ($order->order_type === 'PRE_ORDER' && $order->preOrder) {
                 $orderedUnits = $order->items->sum('quantity');
                 $order->preOrder->decrement('reserved_units', $orderedUnits);
@@ -111,11 +109,10 @@ class OrderController extends Controller
         $order->save();
 
         $defaultNote = match($toStatus) {
-            'CONFIRMED' => 'Pesanan diverifikasi & dikonfirmasi oleh Admin/Kasir.',
-            'PREPARING' => 'Pesanan sedang diproses dan diracik oleh Barista.',
-            'READY_FOR_PICKUP' => 'Pesanan telah selesai dibuat dan siap diambil oleh pelanggan di kedai.',
-            'COMPLETED' => 'Pesanan telah diserahkan dan transaksi selesai.',
-            'CANCELLED' => 'Pesanan dibatalkan oleh Admin/Kasir.',
+            'CONFIRMED' => 'Pesanan dikonfirmasi oleh Admin via WhatsApp.',
+            'PREPARING' => 'Pesanan sedang diracik oleh Barista.',
+            'COMPLETED' => 'Pesanan telah selesai diproses.',
+            'CANCELLED' => 'Pesanan dibatalkan.',
             default => "Status diubah dari {$fromStatus} ke {$toStatus}",
         };
 

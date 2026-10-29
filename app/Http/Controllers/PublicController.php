@@ -171,34 +171,22 @@ class PublicController extends Controller
                 $normalizedPhone = '62' . substr($normalizedPhone, 1);
             }
 
-            // Deduplikasi Customer atau Sinkronisasi Akun
-            if (Auth::guard('customer')->check()) {
-                $customer = Auth::guard('customer')->user();
-                $customer->update([
+            // Simpan atau ambil data customer berdasarkan nomor telepon
+            $customer = Customer::firstOrCreate(
+                ['normalized_phone' => $normalizedPhone],
+                [
                     'name' => trim($request->customer_name),
                     'phone' => $rawPhone,
-                    'normalized_phone' => $normalizedPhone,
-                    'instagram_handle' => $request->instagram_handle ?: $customer->instagram_handle,
-                ]);
-            } else {
-                $customer = Customer::firstOrCreate(
-                    ['normalized_phone' => $normalizedPhone],
-                    [
-                        'name' => trim($request->customer_name),
-                        'phone' => $rawPhone,
-                        'instagram_handle' => $request->instagram_handle,
-                    ]
-                );
+                    'instagram_handle' => $request->instagram_handle,
+                ]
+            );
 
-                if ($request->filled('password') && strlen($request->password) >= 6) {
-                    $customer->password = Hash::make($request->password);
-                    $customer->name = trim($request->customer_name);
-                    $customer->phone = $rawPhone;
-                    $customer->instagram_handle = $request->instagram_handle ?: $customer->instagram_handle;
-                    $customer->save();
-                    Auth::guard('customer')->login($customer, true);
-                }
-            }
+            // Perbarui nama atau instagram jika ada pembaruan
+            $customer->update([
+                'name' => trim($request->customer_name),
+                'phone' => $rawPhone,
+                'instagram_handle' => $request->instagram_handle ?: $customer->instagram_handle,
+            ]);
 
             // Validasi Pre-Order jika pesanan jenis PO
             $preOrder = null;
@@ -335,10 +323,8 @@ class PublicController extends Controller
             . "Pesanan:\n"
             . "{$itemsText}\n"
             . "Total: {$formattedTotal}\n"
-            . "Jenis: {$orderTypeLabel}\n"
-            . "Pengambilan: {$pickupTime}\n"
             . "Catatan: {$notes}\n\n"
-            . "Mohon konfirmasi pesanan saya. Terima kasih.";
+            . "Mohon proses pesanan saya. Terima kasih!";
 
         $adminPhone = $settings['whatsapp_number'] ?? '6281234567890';
         $adminPhoneClean = preg_replace('/[^0-9]/', '', $adminPhone);

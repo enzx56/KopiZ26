@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicController;
-use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
@@ -15,7 +14,7 @@ use App\Http\Controllers\Admin\SettingController;
 
 /*
 |--------------------------------------------------------------------------
-| Website Publik (Customer Area & Katalog)
+| Website Publik (Katalog & Pemesanan WhatsApp)
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
@@ -33,15 +32,6 @@ Route::get('/keranjang', [PublicController::class, 'cart'])->name('cart');
 Route::get('/checkout', [PublicController::class, 'checkout'])->name('checkout');
 Route::post('/checkout', [PublicController::class, 'processCheckout'])->name('checkout.process');
 Route::get('/pesanan/{orderCode}', [PublicController::class, 'trackOrder'])->name('order.track');
-
-// Pelacakan & Akun Pelanggan (Customer Auth)
-Route::get('/lacak', [CustomerAuthController::class, 'trackLookup'])->name('order.lookup');
-Route::get('/daftar', [CustomerAuthController::class, 'showRegisterForm'])->name('customer.register');
-Route::post('/daftar', [CustomerAuthController::class, 'register'])->name('customer.register.submit');
-Route::get('/masuk', [CustomerAuthController::class, 'showLoginForm'])->name('customer.login');
-Route::post('/masuk', [CustomerAuthController::class, 'login'])->name('customer.login.submit');
-Route::post('/keluar', [CustomerAuthController::class, 'logout'])->name('customer.logout');
-Route::get('/pesanan-saya', [CustomerAuthController::class, 'myOrders'])->name('customer.orders');
 
 // Halaman Statis & Informasi Brand
 Route::get('/tentang', [PublicController::class, 'about'])->name('about');

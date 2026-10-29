@@ -19,7 +19,6 @@
                     <option value="PENDING" {{ request('status') == 'PENDING' ? 'selected' : '' }}>PENDING</option>
                     <option value="CONFIRMED" {{ request('status') == 'CONFIRMED' ? 'selected' : '' }}>CONFIRMED</option>
                     <option value="PREPARING" {{ request('status') == 'PREPARING' ? 'selected' : '' }}>PREPARING</option>
-                    <option value="READY_FOR_PICKUP" {{ request('status') == 'READY_FOR_PICKUP' ? 'selected' : '' }}>READY_FOR_PICKUP</option>
                     <option value="COMPLETED" {{ request('status') == 'COMPLETED' ? 'selected' : '' }}>COMPLETED</option>
                     <option value="CANCELLED" {{ request('status') == 'CANCELLED' ? 'selected' : '' }}>CANCELLED</option>
                 </select>
@@ -54,7 +53,7 @@
                     <tr>
                         <th class="py-3 px-4">Kode Order</th>
                         <th class="py-3 px-4">Tanggal Order</th>
-                        <th class="py-3 px-4">Pelanggan</th>
+                        <th class="py-3 px-4">Pemesan</th>
                         <th class="py-3 px-4">Tipe & Rincian Item</th>
                         <th class="py-3 px-4">Total</th>
                         <th class="py-3 px-4">Status</th>
@@ -98,7 +97,6 @@
                                         'PENDING' => 'bg-[#B7791F]/15 text-[#B7791F]',
                                         'CONFIRMED' => 'bg-[#2E7D5B]/15 text-[#2E7D5B]',
                                         'PREPARING' => 'bg-[#B9824A]/15 text-[#B9824A]',
-                                        'READY_FOR_PICKUP' => 'bg-[#2E7D5B]/20 text-[#2E7D5B]',
                                         'COMPLETED' => 'bg-[#3A2418] text-white',
                                         'CANCELLED' => 'bg-[#B93838]/15 text-[#B93838]',
                                         default => 'bg-gray-100 text-gray-700'
