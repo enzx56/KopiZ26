@@ -3,14 +3,6 @@
   "outputDirectory": "public",
   "builds": [
     {
-      "src": "api/info.php",
-      "use": "vercel-php@0.8.0"
-    },
-    {
-      "src": "api/test.php",
-      "use": "vercel-php@0.8.0"
-    },
-    {
       "src": "api/index.php",
       "use": "vercel-php@0.8.0"
     },
@@ -20,14 +12,6 @@
     }
   ],
   "routes": [
-    {
-      "src": "/info",
-      "dest": "/api/info.php"
-    },
-    {
-      "src": "/api/test",
-      "dest": "/api/test.php"
-    },
     {
       "src": "/build/(.*)",
       "dest": "/public/build/$1"
