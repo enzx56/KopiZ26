@@ -17,6 +17,27 @@ use App\Http\Controllers\Admin\SettingController;
 | Website Publik (Customer Area)
 |--------------------------------------------------------------------------
 */
+Route::get('/debug-db', function () {
+    try {
+        $users = \App\Models\User::count();
+        $products = \App\Models\Product::count();
+        return response()->json(['status' => 'DB_OK', 'users' => $users, 'products' => $products]);
+    } catch (\Throwable $e) {
+        return response()->json(['status' => 'DB_ERROR', 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
+    }
+});
+
+Route::get('/debug-view', function () {
+    try {
+        $settings = \App\Models\Setting::pluck('value', 'key')->all();
+        $featuredProducts = \App\Models\Product::active()->take(6)->get();
+        $activePreOrders = \App\Models\PreOrder::take(2)->get();
+        return view('public.home', compact('settings', 'featuredProducts', 'activePreOrders'));
+    } catch (\Throwable $e) {
+        return response()->json(['status' => 'VIEW_ERROR', 'message' => $e->getMessage(), 'file' => $e->getFile() . ':' . $e->getLine()], 500);
+    }
+});
+
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/menu', [PublicController::class, 'menu'])->name('menu');
 Route::get('/menu/{slug}', [PublicController::class, 'menuDetail'])->name('menu.detail');
