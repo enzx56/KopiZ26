@@ -30,8 +30,13 @@
     }
   ],
   "env": {
+    "APP_NAME": "KopiZ",
     "APP_ENV": "production",
+    "APP_KEY": "base64:yfYSh6/VQyuwk/CA1KGdo4oeQVG3oZBZgXXLmGrkwZA=",
     "APP_DEBUG": "false",
+    "DB_CONNECTION": "pgsql",
+    "SESSION_DRIVER": "database",
+    "CACHE_STORE": "database",
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
     "APP_PACKAGES_CACHE": "/tmp/packages.php",
