@@ -18,26 +18,38 @@ class PublicController extends Controller
 {
     protected function getCommonSettings()
     {
-        return Setting::pluck('value', 'key')->all();
+        try {
+            return Setting::pluck('value', 'key')->all();
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     public function home()
     {
         $settings = $this->getCommonSettings();
-        $featuredProducts = Product::active()->where('is_featured', true)->take(6)->get();
-        if ($featuredProducts->isEmpty()) {
-            $featuredProducts = Product::active()->take(6)->get();
+        try {
+            $featuredProducts = Product::active()->where('is_featured', true)->take(6)->get();
+            if ($featuredProducts->isEmpty()) {
+                $featuredProducts = Product::active()->take(6)->get();
+            }
+        } catch (\Throwable $e) {
+            $featuredProducts = collect();
         }
 
-        $activePreOrders = PreOrder::where('status', 'OPEN')
-            ->where(function ($q) {
-                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
-            })
-            ->where(function ($q) {
-                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
-            })
-            ->take(2)
-            ->get();
+        try {
+            $activePreOrders = PreOrder::where('status', 'OPEN')
+                ->where(function ($q) {
+                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                })
+                ->where(function ($q) {
+                    $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+                })
+                ->take(2)
+                ->get();
+        } catch (\Throwable $e) {
+            $activePreOrders = collect();
+        }
 
         return view('public.home', compact('settings', 'featuredProducts', 'activePreOrders'));
     }
