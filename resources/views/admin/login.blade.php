@@ -46,12 +46,12 @@
             @csrf
             <div>
                 <label class="block text-xs font-bold text-[#3A2418] mb-1">Email Admin</label>
-                <input type="email" name="email" value="{{ old('email', 'admin@kopiz.id') }}" required class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
+                <input type="email" name="email" value="{{ old('email') }}" placeholder="masukkan email admin..." required autocomplete="off" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-[#3A2418] mb-1">Password</label>
-                <input type="password" name="password" required value="admin123" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
+                <input type="password" name="password" required placeholder="masukkan password..." autocomplete="new-password" class="w-full px-4 py-3 rounded-2xl border border-[#D8B894] text-sm text-[#3A2418] focus:outline-none focus:border-[#B9824A] bg-[#FFF8EF]">
             </div>
 
             <div class="flex items-center justify-between text-xs">

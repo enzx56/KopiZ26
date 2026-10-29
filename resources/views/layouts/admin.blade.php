@@ -98,6 +98,11 @@
                     <span>Laporan & Ekspor</span>
                 </a>
 
+                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('admin.users*') ? 'bg-[#B9824A] text-white shadow-md' : 'text-[#FFF8EF]/80 hover:bg-[#6F4E37]/50 hover:text-white' }}">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    <span>Kelola Admin</span>
+                </a>
+
                 <a href="{{ route('admin.settings.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all {{ request()->routeIs('admin.settings*') ? 'bg-[#B9824A] text-white shadow-md' : 'text-[#FFF8EF]/80 hover:bg-[#6F4E37]/50 hover:text-white' }}">
                     <i data-lucide="settings" class="w-5 h-5"></i>
                     <span>Pengaturan Brand</span>

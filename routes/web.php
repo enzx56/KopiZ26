@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +86,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Reports & Export
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/export-csv', [ReportController::class, 'exportCsv'])->name('reports.export-csv');
+
+        // Admin User Management
+        Route::resource('users', UserController::class);
 
         // Settings & Content
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
